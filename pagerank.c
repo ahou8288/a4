@@ -27,8 +27,8 @@
             node* cur=list;
             while (cur!=NULL){ //For every page (up to npages)
                 new_scores[i]=damp_minus;
-                for (node* links = cur->page->inlinks; links!=NULL; links=links->next){ //loop through IN(u)
-                    new_scores[i]+=dampener*(page_scores[links->page->index]/links->page->noutlinks); //Should only multiply by dampener once.
+                for (node* links = cur->page->inlinks; links!=NULL; links=links->next){ //loop through IN(u) //10%
+                    new_scores[i]+=dampener*(page_scores[links->page->index]/links->page->noutlinks); //Should only multiply by dampener once. //60%
                     //Also only calculate score/index once.
                 }
                 i++;
@@ -40,8 +40,8 @@
             // Check for convergence
             double converge_total=0;
             for (int j=0;j<npages;j++){
-                double temp=page_scores[j]-new_scores[j];
-                converge_total+=temp*temp;
+                double temp=page_scores[j]-new_scores[j]; //8%
+                converge_total+=temp*temp; //16%
             }
             converged =(converge_total<EPSILON*EPSILON);
             
@@ -85,4 +85,3 @@
     
     	return 0;
     }
-

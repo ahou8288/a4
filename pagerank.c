@@ -9,20 +9,7 @@
     #include "pagerank.h"
     
     void pagerank(node* list, int npages, int nedges, int nthreads, double dampener) {
-        
-        //Eliminate linked lists?
-        //Page array?
-        //How to do inlinks?
-            //New array
-            //array of indexes?
-        
-        /*struct page {
-        	int index;
-        	int noutlinks;
-        	node* inlinks;
-        	char name[MAX_NAME];
-        };*/
-        
+        //Page array
         int noutlinks[npages];
         int inlinks[npages][npages]; //one for each page, up to npages in length
         char name[npages][MAX_NAME];
@@ -41,11 +28,12 @@
             int i2=0;
             node* cur_link=cur->page->inlinks;
             while (cur_link!=NULL){
-                inlinks[i1][i2]=cur_link->page->index;
+                inlinks[i1][i2]=cur_link->page->index; // not working for later levels
                 i2++;
                 cur_link=cur_link->next;
             }
             cur=cur->next;
+            i1++;
         }
         
         double page_scores[npages];
@@ -64,7 +52,6 @@
             for (int i=0;i<npages;i++){
                 new_scores[i]=damp_minus;
                 for (int j=0;j<npages&&inlinks[i][j]!=-1;j++){
-                    printf("j = %d\n",j);
                     new_scores[i]+=dampener*(page_scores[inlinks[i][j]]/noutlinks[inlinks[i][j]]);
                 }
             }
@@ -82,7 +69,7 @@
         }
         int k=0;
     	for (node* cur=list;cur!=NULL;cur=cur->next){
-    	    printf("%s %.4lf\n",cur->page->name,new_scores[k]);
+    	    printf("%s %.4lf\n",name[k],new_scores[k]);
     	    k++;
     	}
     	

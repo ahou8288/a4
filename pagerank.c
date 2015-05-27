@@ -10,33 +10,65 @@
     
     void pagerank(node* list, int npages, int nedges, int nthreads, double dampener) {
         
+        //Eliminate linked lists?
+        //Page array?
+        //How to do inlinks?
+            //New array
+            //array of indexes?
+        
+        /*struct page {
+        	int index;
+        	int noutlinks;
+        	node* inlinks;
+        	char name[MAX_NAME];
+        };*/
+        
+        int noutlinks[npages];
+        int inlinks[npages][npages]; //one for each page, up to npages in length
+        char name[npages][MAX_NAME];
+        
+        for (int i = 0; i < npages; i++){
+            for (int j = 0; j < npages; j++){
+                inlinks[i][j] = -1;
+            }
+        }
+        
+        int i1=0;
+        node* cur=list;
+        while (cur!=NULL){
+            noutlinks[i1]=cur->page->noutlinks;
+            strcpy(name[i1],cur->page->name);
+            int i2=0;
+            node* cur_link=cur->page->inlinks;
+            while (cur_link!=NULL){
+                inlinks[i1][i2]=cur_link->page->index;
+                i2++;
+                cur_link=cur_link->next;
+            }
+            cur=cur->next;
+        }
+        
         double page_scores[npages];
         double new_scores[npages];
         
         //Fill array with initial value
         double first_score=1.0/npages;
         for (int i=0;i<npages;i++){
-            page_scores[i]=first_score;
+            page_scores[i]=first_score; //Probably a faster way
         }
         
         double damp_minus=(1-dampener)/npages;
         bool converged=false;
         
         while(!converged){
-            int i=0;
-            node* cur=list;
-            while (cur!=NULL){ //For every page (up to npages)
+            for (int i=0;i<npages;i++){
                 new_scores[i]=damp_minus;
-                for (node* links = cur->page->inlinks; links!=NULL; links=links->next){ //loop through IN(u) //10%
-                    new_scores[i]+=dampener*(page_scores[links->page->index]/links->page->noutlinks); //Should only multiply by dampener once. //60%
-                    //Also only calculate score/index once.
+                for (int j=0;j<npages&&inlinks[i][j]!=-1;j++){
+                    printf("j = %d\n",j);
+                    new_scores[i]+=dampener*(page_scores[inlinks[i][j]]/noutlinks[inlinks[i][j]]);
                 }
-                i++;
-                if (cur->next==NULL){
-                    break;
-                }
-                cur=cur->next;
             }
+            
             // Check for convergence
             double converge_total=0;
             for (int j=0;j<npages;j++){
@@ -53,6 +85,7 @@
     	    printf("%s %.4lf\n",cur->page->name,new_scores[k]);
     	    k++;
     	}
+    	
     }
     
     /*

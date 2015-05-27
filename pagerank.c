@@ -13,12 +13,14 @@
         int noutlinks[npages];
         int inlinks[npages][npages]; //one for each page, up to npages in length
         char name[npages][MAX_NAME];
-        
+        /*
         for (int i = 0; i < npages; i++){
             for (int j = 0; j < npages; j++){
                 inlinks[i][j] = -1;
             }
         }
+        */
+        memset(inlinks, -1, sizeof(inlinks[npages][npages]) * npages * npages);
         
         int i1=0;
         node* cur=list;
@@ -32,6 +34,8 @@
                 i2++;
                 cur_link=cur_link->next;
             }
+            int len=i2;
+            
             cur=cur->next;
             i1++;
         }
@@ -45,7 +49,7 @@
             page_scores[i]=first_score; //Probably a faster way
         }
         
-        double damp_minus=(1-dampener)/npages;
+        double damp_minus=(1.0-dampener)/npages;
         bool converged=false;
         
         while(!converged){
@@ -67,10 +71,9 @@
             //Move the scores (could be skipped if alternated destination)
             memcpy(page_scores,new_scores,sizeof(double)*npages);
         }
-        int k=0;
-    	for (node* cur=list;cur!=NULL;cur=cur->next){
+        
+    	for (int k=0;k<npages;k++){
     	    printf("%s %.4lf\n",name[k],new_scores[k]);
-    	    k++;
     	}
     	
     }

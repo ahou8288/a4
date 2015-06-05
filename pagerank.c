@@ -47,6 +47,11 @@ static void *worker(void *arg){
         argument->new_scores[i]=argument->damp_minus+temp_score*argument->dampener; //27.57%
     }
     
+    for (int j=0;j<argument->npages;j++){
+        double temp=argument->page_scores[j]-argument->new_scores[j]; //8.68%
+        argument->converge_total+=temp*temp; //18.59%
+    }
+    
     return NULL;
 }
  
@@ -67,13 +72,25 @@ void pagerank(node* list, int npages, int nedges, int nthreads, double dampener)
     node* cur_page=list; //Create the current page
     int cur_index; //Index of the current page
     int inlink_index=0; //Index of the consecutively stored inlinks
+    int inlink_thread_index=0;
+    //printf("nthreads= %d\n",nthreads);
     while (cur_page!=NULL){
         cur_index=cur_page->page->index; //set the curent index (page)
-        
+        bool link_filled=false;
         //INLINKS
         num_inlinks[cur_index]=0;
         node* loop_page=cur_page->page->inlinks;
         while(loop_page!=NULL){
+            if (nthreads>1){
+                if (cur_index%(npages/nthreads)==0&&!link_filled){ //if this is the start of a thread
+                    printf("cur_index %d inlink_index %d\n",cur_index,inlink_index);
+                    inlink_thread_start[inlink_thread_index]=inlink_index;
+                    inlink_thread_index++;
+                    link_filled=true;
+                }
+            } else {
+                inlink_thread_start[0]=0;
+            }
             num_inlinks[cur_index]++;
             inlink_indices[inlink_index]=loop_page->page->index;
             inlink_index++;
@@ -142,11 +159,13 @@ void pagerank(node* list, int npages, int nedges, int nthreads, double dampener)
         printf("%s %.4lf\n",cur->page->name,temp_adr[k]);
         k++;
     }
+    
     free(num_inlinks);
     free(inv_outlinks);
     free(inlink_indices);
     free(new_scores);
     free(page_scores);
+    free(args);
 }
  
 /*
